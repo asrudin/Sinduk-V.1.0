@@ -43,7 +43,7 @@ export default function NilaiManager({
   const [selectedSemester, setSelectedSemester] = useState<'ganjil' | 'genap'>('ganjil');
 
   // Active Sub-tab
-  const [subTab, setSubTab] = useState<'akademik' | 'kegiatan'>('akademik');
+  const [subTab, setSubTab] = useState<'akademik' | 'kokurikuler' | 'ekstrakurikuler'>('akademik');
 
   // Input states for Subject Grades
   const [subjectName, setSubjectName] = useState('Matematika');
@@ -92,6 +92,10 @@ export default function NilaiManager({
     a.semester === selectedSemester
   );
 
+  const displayActivities = filteredActivities.filter(a => 
+    subTab === 'kokurikuler' ? a.type === 'kokurikuler' : a.type === 'ekstrakurikuler'
+  );
+
   // Standard primary school subjects
   const STANDARD_SUBJECTS = [
     'Pendidikan Agama dan Budi Pekerti',
@@ -119,6 +123,7 @@ export default function NilaiManager({
 
   const COCURRICULAR_TEMPLATES = [
     'Projek Penguatan Profil Pelajar Pancasila (P5)',
+    'Senam Anak Indonesia Hebat',
     'Karya Ilmiah Remaja (KIR) Pratama',
     'Pendalaman Karakter Keagamaan',
     'Kunjungan Museum & Literasi Sejarah',
@@ -397,7 +402,7 @@ export default function NilaiManager({
               </div>
             </div>
             
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setSubTab('akademik')}
                 className={`px-3 py-1.5 text-xs font-bold rounded-xl border transition flex items-center gap-1.5 ${
@@ -410,15 +415,38 @@ export default function NilaiManager({
                 A. Daftar Nilai Kognitif
               </button>
               <button
-                onClick={() => setSubTab('kegiatan')}
+                onClick={() => {
+                  setSubTab('kokurikuler');
+                  setActivityType('kokurikuler');
+                  setActivityName('Projek Penguatan Profil Pelajar Pancasila (P5)');
+                  setCustomActivityName('');
+                  setEditingActivityId(null);
+                }}
                 className={`px-3 py-1.5 text-xs font-bold rounded-xl border transition flex items-center gap-1.5 ${
-                  subTab === 'kegiatan'
+                  subTab === 'kokurikuler'
                     ? 'bg-indigo-600 text-white border-indigo-500 shadow'
                     : 'bg-slate-900/40 text-slate-400 border-white/5 hover:text-white'
                 }`}
               >
-                <Award className="h-3.5 w-3.5" />
-                B. Ekstra & Kokurikuler
+                <Sparkles className="h-3.5 w-3.5 text-amber-400" />
+                B. Kegiatan Kokurikuler
+              </button>
+              <button
+                onClick={() => {
+                  setSubTab('ekstrakurikuler');
+                  setActivityType('ekstrakurikuler');
+                  setActivityName('Pramuka Siaga/Penggalang');
+                  setCustomActivityName('');
+                  setEditingActivityId(null);
+                }}
+                className={`px-3 py-1.5 text-xs font-bold rounded-xl border transition flex items-center gap-1.5 ${
+                  subTab === 'ekstrakurikuler'
+                    ? 'bg-indigo-600 text-white border-indigo-500 shadow'
+                    : 'bg-slate-900/40 text-slate-400 border-white/5 hover:text-white'
+                }`}
+              >
+                <Award className="h-3.5 w-3.5 text-indigo-400" />
+                C. Kegiatan Ekstrakurikuler
               </button>
             </div>
           </div>
@@ -536,8 +564,17 @@ export default function NilaiManager({
                 <div className="glass-card p-5 rounded-2xl border border-white/10 space-y-4">
                   <div className="flex justify-between items-center">
                     <h3 className="text-xs font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
-                      <Award className="h-4 w-4 text-indigo-400" />
-                      {editingActivityId ? 'Edit Catatan Kegiatan' : 'Tambah Catatan Kegiatan'}
+                      {subTab === 'kokurikuler' ? (
+                        <>
+                          <Sparkles className="h-4 w-4 text-amber-400" />
+                          {editingActivityId ? 'Edit Kegiatan Kokurikuler' : 'Tambah Kegiatan Kokurikuler'}
+                        </>
+                      ) : (
+                        <>
+                          <Award className="h-4 w-4 text-indigo-400" />
+                          {editingActivityId ? 'Edit Kegiatan Ekstrakurikuler' : 'Tambah Kegiatan Ekstrakurikuler'}
+                        </>
+                      )}
                     </h3>
                     {editingActivityId && (
                       <button
@@ -554,36 +591,6 @@ export default function NilaiManager({
                   </div>
 
                   <form onSubmit={handleSaveActivity} className="space-y-4 text-xs font-medium text-slate-300">
-                    <div>
-                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Jenis Kegiatan</label>
-                      <div className="flex bg-slate-950/60 border border-white/10 rounded-xl p-1">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setActivityType('ekstrakurikuler');
-                            setActivityName('Pramuka');
-                          }}
-                          className={`flex-1 py-1.5 text-[10px] font-bold rounded-lg uppercase tracking-wider transition ${
-                            activityType === 'ekstrakurikuler' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
-                          }`}
-                        >
-                          Ekstrakurikuler
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setActivityType('kokurikuler');
-                            setActivityName('Projek Penguatan Profil Pelajar Pancasila (P5)');
-                          }}
-                          className={`flex-1 py-1.5 text-[10px] font-bold rounded-lg uppercase tracking-wider transition ${
-                            activityType === 'kokurikuler' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
-                          }`}
-                        >
-                          Kokurikuler
-                        </button>
-                      </div>
-                    </div>
-
                     <div>
                       <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Nama Kegiatan</label>
                       <select
@@ -747,23 +754,34 @@ export default function NilaiManager({
                 <div className="glass-card rounded-2xl overflow-hidden border border-white/10 shadow-xl">
                   <div className="p-4 bg-white/5 border-b border-white/10 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Award className="h-4 w-4 text-indigo-400" />
-                      <h3 className="text-xs font-extrabold text-white uppercase tracking-wider">
-                        Rangkuman Kegiatan Siswa ({filteredActivities.length})
-                      </h3>
+                      {subTab === 'kokurikuler' ? (
+                        <>
+                          <Sparkles className="h-4 w-4 text-amber-400" />
+                          <h3 className="text-xs font-extrabold text-white uppercase tracking-wider">
+                            Rangkuman Kegiatan Kokurikuler ({displayActivities.length})
+                          </h3>
+                        </>
+                      ) : (
+                        <>
+                          <Award className="h-4 w-4 text-indigo-400" />
+                          <h3 className="text-xs font-extrabold text-white uppercase tracking-wider">
+                            Rangkuman Kegiatan Ekstrakurikuler ({displayActivities.length})
+                          </h3>
+                        </>
+                      )}
                     </div>
                     <span className="text-[10px] text-slate-400 font-mono uppercase bg-slate-950/60 px-2 py-1 rounded">
                       Semester {selectedSemester}
                     </span>
                   </div>
 
-                  {filteredActivities.length === 0 ? (
+                  {displayActivities.length === 0 ? (
                     <div className="p-12 text-center text-slate-500 text-xs font-semibold">
-                      Belum ada kegiatan ekstrakurikuler atau kokurikuler yang terdaftar untuk siswa ini di Semester {selectedSemester}.
+                      Belum ada kegiatan {subTab === 'kokurikuler' ? 'kokurikuler' : 'ekstrakurikuler'} yang terdaftar untuk siswa ini di Semester {selectedSemester}.
                     </div>
                   ) : (
                     <div className="divide-y divide-white/5">
-                      {filteredActivities.map((a) => (
+                      {displayActivities.map((a) => (
                         <div key={a.id} className="p-4 hover:bg-white/5 transition flex justify-between items-start gap-4">
                           <div className="space-y-1.5 flex-1 min-w-0">
                             <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
@@ -789,6 +807,7 @@ export default function NilaiManager({
                             <button
                               onClick={() => {
                                 setEditingActivityId(a.id);
+                                setSubTab(a.type);
                                 setActivityType(a.type);
                                 if (EXTRACURRICULAR_TEMPLATES.includes(a.activityName) || COCURRICULAR_TEMPLATES.includes(a.activityName)) {
                                   setActivityName(a.activityName);

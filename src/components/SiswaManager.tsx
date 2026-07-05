@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Siswa, Class, AcademicYear, StudentStatus, SubjectGrade, ActivityRecord } from '../types';
+import CetakHvsModal from './CetakHvsModal';
 import { 
   Plus, 
   Search, 
@@ -53,6 +54,10 @@ export default function SiswaManager({
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [editingSiswa, setEditingSiswa] = useState<Siswa | null>(null);
   const [detailedSiswa, setDetailedSiswa] = useState<Siswa | null>(null);
+
+  // Print modal states
+  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
+  const [printPreselectedSiswaId, setPrintPreselectedSiswaId] = useState<string | null>(null);
 
   // Form Tab Control (Pribadi, Akademik, Orang Tua, Fisik/Catatan)
   const [formTab, setFormTab] = useState<'pribadi' | 'akademik' | 'ortu' | 'lain'>('pribadi');
@@ -511,16 +516,29 @@ export default function SiswaManager({
           <h1 className="text-xl font-bold text-white tracking-tight">Buku Induk Kesiswaan</h1>
           <p className="text-xs text-slate-400 mt-0.5 font-medium">Registrasi, telusuri profil menyeluruh, cetak formulir resmi Buku Induk Siswa</p>
         </div>
-        {currentUser.role === 'admin' && (
+        <div className="flex flex-wrap items-center gap-2.5">
           <button
-            id="btn-add-siswa"
-            onClick={handleOpenAddModal}
-            className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl transition shadow-lg shadow-indigo-600/20 cursor-pointer"
+            id="btn-open-print-menu"
+            onClick={() => {
+              setPrintPreselectedSiswaId(null);
+              setIsPrintModalOpen(true);
+            }}
+            className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs rounded-xl transition border border-white/10 cursor-pointer shadow-lg"
           >
-            <Plus className="h-4 w-4" />
-            Registrasi Siswa Baru
+            <Printer className="h-4 w-4 text-indigo-400" />
+            Cetak Buku Induk (HVS)
           </button>
-        )}
+          {currentUser.role === 'admin' && (
+            <button
+              id="btn-add-siswa"
+              onClick={handleOpenAddModal}
+              className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl transition shadow-lg shadow-indigo-600/20 cursor-pointer"
+            >
+              <Plus className="h-4 w-4" />
+              Registrasi Siswa Baru
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Searching & Filter Bar */}
@@ -677,8 +695,11 @@ export default function SiswaManager({
                         {/* Print Buku Induk */}
                         <button
                           id={`btn-print-${s.id}`}
-                          title="Cetak Lembar Buku Induk"
-                          onClick={() => handlePrintSiswa(s)}
+                          title="Cetak Lembar Buku Induk (HVS)"
+                          onClick={() => {
+                            setPrintPreselectedSiswaId(s.id);
+                            setIsPrintModalOpen(true);
+                          }}
                           className="p-1.5 bg-slate-800 hover:bg-indigo-950 hover:text-indigo-400 text-indigo-300 rounded-lg border border-indigo-500/20 transition cursor-pointer"
                         >
                           <Printer className="h-3.5 w-3.5" />
@@ -1311,11 +1332,14 @@ export default function SiswaManager({
             <div className="p-4 bg-slate-950/80 border-t border-white/10 flex justify-between items-center">
               <button
                 id="btn-print-detail-trigger"
-                onClick={() => handlePrintSiswa(detailedSiswa)}
+                onClick={() => {
+                  setPrintPreselectedSiswaId(detailedSiswa.id);
+                  setIsPrintModalOpen(true);
+                }}
                 className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl transition cursor-pointer"
               >
                 <Printer className="h-4 w-4" />
-                Cetak Lembar Buku Induk Resmi
+                Cetak Buku Induk (HVS)
               </button>
               <button
                 onClick={() => setIsDetailModalOpen(false)}
@@ -1327,6 +1351,20 @@ export default function SiswaManager({
           </div>
         </div>
       )}
+
+      <CetakHvsModal
+        isOpen={isPrintModalOpen}
+        onClose={() => {
+          setIsPrintModalOpen(false);
+          setPrintPreselectedSiswaId(null);
+        }}
+        siswa={siswa}
+        classes={classes}
+        academicYears={academicYears}
+        subjectGrades={subjectGrades}
+        activityRecords={activityRecords}
+        preselectedSiswaId={printPreselectedSiswaId}
+      />
     </div>
   );
 }
